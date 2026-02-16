@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base Arithmetic & Conversion Guide</title>
+    <title>Base Arithmetic & Conversion Masterclass</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -18,7 +22,7 @@
             line-height: 1.6;
             color: var(--text);
             background: var(--bg);
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -44,14 +48,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             margin-bottom: 25px;
             border: 1px solid #e2e8f0;
-        }
-
-        .step-box {
-            background: #eff6ff;
-            border-left: 4px solid var(--primary);
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 4px 4px 0;
         }
 
         /* Calculator Styles */
@@ -95,7 +91,7 @@
             border-radius: 6px;
             color: white;
             font-size: 16px;
-            box-sizing: border-box; /* Fix padding width issue */
+            box-sizing: border-box;
         }
         
         input:focus, select:focus {
@@ -111,7 +107,7 @@
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
@@ -128,20 +124,29 @@
 
         .result-display {
             background: rgba(0,0,0,0.3);
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
             font-family: monospace;
             border-left: 4px solid var(--accent);
-            min-height: 60px;
         }
 
-        /* Responsive Utilities */
-        @media (max-width: 600px) {
-            .calc-controls { grid-template-columns: 1fr; }
+        .steps-container {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            white-space: pre-wrap; /* Keeps formatting */
+            border: 1px dashed #64748b;
         }
 
         .hidden { display: none; }
+        
+        /* MathJax fix for dark background */
+        mjx-container { color: white !important; }
+        .card mjx-container { color: var(--text) !important; }
+
     </style>
 </head>
 <body>
@@ -161,14 +166,21 @@
             </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Working Base</label>
-            <select id="baseSelect">
-                <option value="2">Binary (Base 2)</option>
-                <option value="8">Octal (Base 8)</option>
-                <option value="10" selected>Decimal (Base 10)</option>
-                <option value="16">Hexadecimal (Base 16)</option>
-            </select>
+        <div style="margin-bottom: 15px; display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <div>
+                <label>Working Base</label>
+                <select id="baseSelect" onchange="toggleCustomBase()">
+                    <option value="2">Binary (Base 2)</option>
+                    <option value="8">Octal (Base 8)</option>
+                    <option value="10" selected>Decimal (Base 10)</option>
+                    <option value="16">Hexadecimal (Base 16)</option>
+                    <option value="custom">Custom Base...</option>
+                </select>
+            </div>
+            <div id="customBaseContainer" class="hidden">
+                <label>Enter Base (2-36)</label>
+                <input type="number" id="customBaseInput" value="5" min="2" max="36">
+            </div>
         </div>
 
         <div class="calc-controls">
@@ -184,14 +196,14 @@
         </div>
 
         <div id="arithmeticButtons" class="btn-group">
-            <button class="btn-primary" onclick="calculate('+')">Add (+)</button>
-            <button class="btn-primary" onclick="calculate('-')">Sub (-)</button>
-            <button class="btn-primary" onclick="calculate('*')">Mult (*)</button>
-            <button class="btn-primary" onclick="calculate('/')">Div (/)</button>
+            <button class="btn-primary" onclick="calculate('+')">+</button>
+            <button class="btn-primary" onclick="calculate('-')">-</button>
+            <button class="btn-primary" onclick="calculate('*')">×</button>
+            <button class="btn-primary" onclick="calculate('/')">÷</button>
         </div>
 
         <div id="conversionButtons" class="btn-group hidden">
-            <button class="btn-accent" onclick="convert()">Convert to All Bases</button>
+            <button class="btn-accent" onclick="convert()">Convert & Explain</button>
         </div>
 
         <div id="resultOutput" class="result-display">
@@ -210,85 +222,42 @@
     </div>
 
     <h2 id="conversions">1. The "Any-to-Any" Conversion Strategy</h2>
-    <p>The safest way to convert between two different bases (e.g., Base 5 to Base 7) is to use <strong>Base 10</strong> as a bridge.</p>
     
     
 
     <div class="step-box">
         <strong>The Golden Rule:</strong><br>
-        Source Base $\rightarrow$ Convert to Base 10 $\rightarrow$ Convert to Target Base
+        $$ \text{Source Base} \rightarrow \text{Decimal (Base 10)} \rightarrow \text{Target Base} $$
     </div>
 
     <div class="card">
         <h3>Part A: Any Base to Base 10 (Multiplication)</h3>
-        <p>Use <strong>Positional Notation</strong>. Multiply each digit by the base raised to the power of its position.</p>
+        <p>Use <strong>Positional Notation</strong>. Multiply each digit ($d$) by the base ($b$) raised to the power of its position ($i$).</p>
+        $$ \text{Value} = \sum (d \times b^i) $$
         <p><strong>Example: Hex <code>2C</code> to Decimal</strong></p>
-        <pre>
-Position:   1   0
-Digits:     2   C (12)
-Calculation: (2 × 16¹) + (12 × 16⁰)
-           = 32 + 12 
-           = 44
-        </pre>
+        <ul>
+            <li>Positions: $C$ is at 0, $2$ is at 1.</li>
+            <li>Calculation: $(2 \times 16^1) + (12 \times 16^0)$</li>
+            <li>$32 + 12 = 44$</li>
+        </ul>
     </div>
 
     <div class="card">
         <h3>Part B: Base 10 to Any Base (Division)</h3>
-        <p>Use the <strong>Division-Remainder Method</strong>.</p>
+        <p>Use the <strong>Repeated Division Method</strong>.</p>
         <ol>
-            <li>Divide decimal number by target base.</li>
-            <li>Write down remainder.</li>
-            <li>Divide quotient by base again.</li>
-            <li>Repeat until quotient is 0.</li>
+            <li>Divide the number by the target base.</li>
+            <li>Write down the remainder.</li>
+            <li>Use the quotient for the next step.</li>
+            <li>Stop when quotient is 0.</li>
             <li>Read remainders <strong>Bottom-to-Top</strong>.</li>
         </ol>
-        <p><strong>Example: Decimal <code>13</code> to Binary</strong></p>
-        <ul>
-            <li>$13 \div 2 = 6$ R <strong>1</strong></li>
-            <li>$6 \div 2 = 3$ R <strong>0</strong></li>
-            <li>$3 \div 2 = 1$ R <strong>1</strong></li>
-            <li>$1 \div 2 = 0$ R <strong>1</strong></li>
-            <li><strong>Result:</strong> <code>1101</code></li>
-        </ul>
     </div>
 
     <h2 id="binary">2. Binary Arithmetic (Base 2)</h2>
     <div class="card">
-        <h3>Addition Rules</h3>
-        <p>$0+0=0$, $0+1=1$, $1+1=10$ (Carry 1), $1+1+1=11$ (Carry 1)</p>
-        <pre>
-  1011  (11)
-+ 0110  (6)
-------
- 10001  (17)
-        </pre>
-    </div>
-
-    <h2 id="octal">3. Octal Arithmetic (Base 8)</h2>
-    <div class="card">
-        <h3>Addition Logic</h3>
-        <p>Digits 0-7. If sum $\ge$ 8, subtract 8 and carry 1.</p>
-        <pre>
-   145 (Octal)
-+   63
-------
-   230
-1. 5+3=8 -> 0 carry 1
-2. 4+6+1=11 -> 3 carry 1 (11-8=3)
-        </pre>
-    </div>
-
-    <h2 id="hex">4. Hexadecimal Arithmetic (Base 16)</h2>
-    <div class="card">
-        <h3>Addition Logic</h3>
-        <p>Digits 0-9, A-F. If sum $\ge$ 16, subtract 16 and carry 1.</p>
-        <pre>
-   1A (26)
-+  2C (44)
------
-   46 (70)
-1. A(10)+C(12)=22. 22-16=6 carry 1.
-        </pre>
+        <p><strong>Addition:</strong> $1+1=10_2$ (which is 2). Write 0, carry 1.</p>
+        <p><strong>Subtraction:</strong> $0-1$ requires a borrow. The 0 becomes $10_2$ (2), so $2-1=1$.</p>
     </div>
 
     <footer style="margin-top: 50px; text-align: center; color: #64748b; font-size: 0.9em;">
@@ -296,7 +265,7 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
     </footer>
 
     <script>
-        // Toggle between Arithmetic and Conversion modes
+        // --- UI UTILS ---
         function toggleMode() {
             const mode = document.getElementById('modeSelect').value;
             const inputB = document.getElementById('inputBContainer');
@@ -304,9 +273,7 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
             const convBtns = document.getElementById('conversionButtons');
             const output = document.getElementById('resultOutput');
 
-            // Reset output when switching
-            output.innerHTML = 'Mode switched. Enter numbers...';
-
+            output.innerHTML = 'Ready...';
             if (mode === 'arithmetic') {
                 inputB.classList.remove('hidden');
                 arithBtns.classList.remove('hidden');
@@ -318,9 +285,122 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
             }
         }
 
-        function getBase() {
-            return parseInt(document.getElementById('baseSelect').value);
+        function toggleCustomBase() {
+            const select = document.getElementById('baseSelect');
+            const customInput = document.getElementById('customBaseContainer');
+            if(select.value === 'custom') {
+                customInput.classList.remove('hidden');
+            } else {
+                customInput.classList.add('hidden');
+            }
         }
+
+        function getBase() {
+            const select = document.getElementById('baseSelect');
+            if(select.value === 'custom') {
+                const val = parseInt(document.getElementById('customBaseInput').value);
+                return (val >= 2 && val <= 36) ? val : 10;
+            }
+            return parseInt(select.value);
+        }
+
+        // --- STEP GENERATORS ---
+
+        // Generates "Photomath" style text for arithmetic
+        function getArithmeticSteps(a, b, op, base) {
+            let steps = `<strong>Step-by-Step Logic (Base ${base}):</strong>\n`;
+            
+            // Convert to decimal for calculation logic
+            const decA = parseInt(a, base);
+            const decB = parseInt(b, base);
+            
+            if (op === '+') {
+                steps += `We are adding ${a} + ${b} in Base ${base}.\n\n`;
+                steps += `Method: Column Addition\n`;
+                
+                // Pad strings to same length
+                let sA = a.toString().split('').reverse();
+                let sB = b.toString().split('').reverse();
+                const len = Math.max(sA.length, sB.length);
+                let carry = 0;
+                let resultDigits = [];
+
+                for(let i=0; i<len; i++) {
+                    const d1 = parseInt(sA[i] || '0', base);
+                    const d2 = parseInt(sB[i] || '0', base);
+                    
+                    let sum = d1 + d2 + carry;
+                    let newCarry = Math.floor(sum / base);
+                    let digit = sum % base;
+                    
+                    steps += `Column ${i} (Right to Left):\n`;
+                    steps += `  ${d1} + ${d2} + ${carry} (carry) = ${sum} (decimal)\n`;
+                    if(sum >= base) {
+                        steps += `  ${sum} is >= ${base}. So: ${sum} - ${base} = ${digit}. Carry ${newCarry}.\n`;
+                    } else {
+                        steps += `  ${sum} fits in Base ${base}. Write ${digit}. Carry 0.\n`;
+                    }
+                    steps += `  -> Write: ${digit.toString(base).toUpperCase()}\n\n`;
+                    
+                    resultDigits.push(digit.toString(base).toUpperCase());
+                    carry = newCarry;
+                }
+                if(carry > 0) {
+                    steps += `Final Carry: Write ${carry}\n`;
+                    resultDigits.push(carry.toString(base).toUpperCase());
+                }
+                steps += `\nFinal Result (Read up): ${resultDigits.reverse().join('')}`;
+            }
+            else if (op === '-') {
+                steps += `We are subtracting ${a} - ${b} in Base ${base}.\n\n`;
+                steps += `(Note: Logic shown uses decimal values for simpler understanding)\n`;
+                steps += `1. Convert ${a} (base ${base}) -> ${decA} (dec)\n`;
+                steps += `2. Convert ${b} (base ${base}) -> ${decB} (dec)\n`;
+                steps += `3. Subtract: ${decA} - ${decB} = ${decA - decB} (dec)\n`;
+                steps += `4. Convert result back to Base ${base}.\n`;
+            }
+            else {
+                steps += `Operation: ${op}\n`;
+                steps += `1. Convert operands to Decimal: ${decA} and ${decB}\n`;
+                let res;
+                if(op === '*') res = decA * decB;
+                if(op === '/') res = Math.floor(decA / decB);
+                steps += `2. Perform Math in Decimal: ${res}\n`;
+                steps += `3. Convert ${res} back to Base ${base} using repeated division.`;
+            }
+            return steps;
+        }
+
+        // Generates conversion steps
+        function getConversionSteps(valStr, base) {
+            let steps = `<strong>1. Convert to Decimal:</strong>\n`;
+            const digits = valStr.split('').reverse();
+            let decimalSum = 0;
+            
+            // Part A: To Decimal
+            digits.forEach((digit, index) => {
+                const val = parseInt(digit, base);
+                const power = Math.pow(base, index);
+                const stepVal = val * power;
+                decimalSum += stepVal;
+                steps += `  Pos ${index}: ${digit} × ${base}^${index} = ${val} × ${power} = ${stepVal}\n`;
+            });
+            steps += `  Sum: ${decimalSum} (Decimal)\n\n`;
+
+            // Part B: Show breakdown for standard bases
+            steps += `<strong>2. Conversions:</strong>\n`;
+            const bin = decimalSum.toString(2);
+            const oct = decimalSum.toString(8);
+            const hex = decimalSum.toString(16).toUpperCase();
+
+            steps += `  To Binary (÷2): ${bin}\n`;
+            steps += `  To Octal (÷8): ${oct}\n`;
+            steps += `  To Hex (÷16): ${hex}\n`;
+
+            return { steps, dec: decimalSum, bin, oct, hex };
+        }
+
+        // --- MAIN FUNCTIONS ---
 
         function convert() {
             const valA = document.getElementById('numA').value.trim();
@@ -330,19 +410,26 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
             if(!valA) { output.innerHTML = "Please enter a number."; return; }
 
             try {
-                const dec = parseInt(valA, base);
-                if (isNaN(dec)) throw new Error("Invalid number for selected base");
+                // Check validity
+                const test = parseInt(valA, base);
+                if (isNaN(test)) throw new Error("Invalid number for Base " + base);
+
+                const data = getConversionSteps(valA, base);
 
                 output.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div><strong>Binary:</strong> ${dec.toString(2)}</div>
-                        <div><strong>Octal:</strong> ${dec.toString(8)}</div>
-                        <div><strong>Decimal:</strong> ${dec.toString(10)}</div>
-                        <div><strong>Hex:</strong> ${dec.toString(16).toUpperCase()}</div>
+                    <div style="font-size: 1.2em; margin-bottom: 10px;">
+                        Input: <strong>${valA}</strong> (Base ${base})
                     </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                        <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:4px;">Bin: ${data.bin}</div>
+                        <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:4px;">Oct: ${data.oct}</div>
+                        <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:4px;">Dec: ${data.dec}</div>
+                        <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:4px;">Hex: ${data.hex}</div>
+                    </div>
+                    <div class="steps-container">${data.steps}</div>
                 `;
             } catch (e) {
-                output.innerText = "Error: Invalid input for Base " + base;
+                output.innerText = "Error: " + e.message;
             }
         }
 
@@ -358,7 +445,7 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
                 const a = parseInt(strA, base);
                 const b = parseInt(strB, base);
 
-                if (isNaN(a) || isNaN(b)) throw new Error("Invalid inputs");
+                if (isNaN(a) || isNaN(b)) throw new Error("Invalid digits for Base " + base);
 
                 let resDec = 0;
                 let symbol = '';
@@ -375,14 +462,13 @@ Calculation: (2 × 16¹) + (12 × 16⁰)
                 }
 
                 const resBase = resDec.toString(base).toUpperCase();
-                
+                const steps = getArithmeticSteps(strA, strB, op, base);
+
                 output.innerHTML = `
-                    <div style="font-size: 1.1em; margin-bottom: 5px;">
-                        ${strA} ${symbol} ${strB} = <strong style="color: #4ade80;">${resBase}</strong> (Base ${base})
+                    <div style="font-size: 1.5em; margin-bottom: 5px;">
+                        Result: <strong style="color: #4ade80;">${resBase}</strong> <small>(Base ${base})</small>
                     </div>
-                    <div style="font-size: 0.8em; color: #94a3b8;">
-                        Decimal check: ${a} ${symbol} ${b} = ${resDec}
-                    </div>
+                    <div class="steps-container">${steps}</div>
                 `;
             } catch (e) {
                 output.innerText = "Error: " + e.message;
