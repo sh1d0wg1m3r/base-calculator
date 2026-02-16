@@ -3,560 +3,505 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base Arithmetic & Conversion Masterclass</title>
+    <title>Base Calculator (Binary/Octal/Hex)</title>
     
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #0f172a;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #334155;
+            --primary: #3b82f6;
+            --bg: #0f172a;
+            --panel-bg: #1e293b;
+            --text: #e2e8f0;
             --accent: #d946ef;
+            --success: #22c55e;
         }
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
-            max-width: 900px;
-            margin: 0 auto;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
         }
-        
-        /* Typography */
-        h1, h2, h3 { color: var(--secondary); margin-top: 0; }
-        h1 { border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-bottom: 30px; }
-        h2 { margin-top: 40px; border-left: 5px solid var(--primary); padding-left: 15px; }
-        
-        /* Calculator Panel */
-        .calculator-panel {
-            background: var(--secondary);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+        .container {
+            width: 100%;
+            max-width: 800px;
         }
 
-        .calc-header {
+        /* Mode Switcher */
+        .mode-switch {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .mode-toggle {
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
             padding: 5px;
-            border-radius: 8px;
-            display: flex;
-            gap: 5px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
-        
         .mode-btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: none;
+            flex: 1;
+            padding: 12px;
             background: transparent;
-            color: #94a3b8;
+            color: #64748b;
+            border: none;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
-        
         .mode-btn.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Inputs */
-        .control-grid {
+        /* Main Panel */
+        .panel {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #334155;
+        }
+
+        .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 8px;
-            font-size: 0.85em;
-            color: #94a3b8;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            color: #94a3b8;
         }
 
         input, select {
             width: 100%;
-            padding: 12px;
-            background: #334155;
-            border: 1px solid #475569;
-            border-radius: 8px;
+            padding: 15px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
             color: white;
-            font-size: 16px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
             box-sizing: border-box;
-            font-family: monospace;
+            transition: border-color 0.2s;
         }
-        
         input:focus, select:focus {
-            outline: 2px solid var(--primary);
+            outline: none;
             border-color: var(--primary);
         }
 
         /* Buttons */
         .btn-group {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-top: 10px;
         }
-
-        button.action-btn {
-            padding: 14px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.1em;
-            flex: 1;
-            transition: all 0.2s;
-        }
-
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-        
-        .btn-accent { background: var(--accent); color: white; }
-        .btn-accent:hover { background: #c026d3; transform: translateY(-1px); }
-
-        /* Output Areas */
-        .result-display {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-family: monospace;
-            border-left: 4px solid var(--accent);
-        }
-
-        .steps-container {
-            margin-top: 15px;
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 0.95em;
-            white-space: pre-wrap; 
-            border: 1px dashed #475569;
-            color: #e2e8f0;
-            line-height: 1.8;
-        }
-
-        /* Learning Cards */
-        .card {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .step-box {
-            background: #eff6ff;
-            border-left: 4px solid var(--primary);
+        button.op-btn {
             padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 4px 4px 0;
+            font-size: 1.5rem;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button.op-btn:hover { background: var(--primary); }
+        
+        button.convert-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button.convert-btn:hover { opacity: 0.9; }
+
+        /* Results */
+        .result-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border-left: 5px solid var(--success);
+        }
+        
+        .steps {
+            margin-top: 15px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            border: 1px dashed #475569;
         }
 
         .hidden { display: none; }
-        mjx-container { color: inherit !important; }
     </style>
 </head>
 <body>
 
-    <h1>Base Masterclass</h1>
+<div class="container">
+    <div class="mode-switch">
+        <button class="mode-btn active" id="tabArith" onclick="switchMode('arithmetic')">Arithmetic Operations</button>
+        <button class="mode-btn" id="tabConv" onclick="switchMode('conversion')">Base Conversion</button>
+    </div>
 
-    <div class="calculator-panel">
-        <div class="calc-header">
-            <h3 style="color:white; margin:0;">Student Lab</h3>
-            
-            <div class="mode-toggle">
-                <button class="mode-btn active" id="btnModeArith" onclick="setMode('arithmetic')">Arithmetic</button>
-                <button class="mode-btn" id="btnModeConv" onclick="setMode('conversion')">Conversion</button>
+    <div class="panel">
+        
+        <div id="ui-arithmetic">
+            <div style="margin-bottom: 20px;">
+                <label>Base</label>
+                <select id="arithBase">
+                    <option value="2">Binary (Base 2)</option>
+                    <option value="8">Octal (Base 8)</option>
+                    <option value="16">Hexadecimal (Base 16)</option>
+                </select>
             </div>
-        </div>
 
-        <div id="arithmeticControls">
-            <div class="control-grid">
+            <div class="grid-2">
                 <div>
-                    <label>Working Base</label>
-                    <select id="arithBase">
-                        <option value="2">Binary (Base 2)</option>
-                        <option value="8">Octal (Base 8)</option>
-                        <option value="10" selected>Decimal (Base 10)</option>
-                        <option value="16">Hexadecimal (Base 16)</option>
-                    </select>
-                </div>
-                <div></div> <div>
                     <label>Number A</label>
-                    <input type="text" id="numA" placeholder="e.g. 1010">
+                    <input type="text" id="numA" placeholder="...">
                 </div>
                 <div>
                     <label>Number B</label>
-                    <input type="text" id="numB" placeholder="e.g. 0110">
+                    <input type="text" id="numB" placeholder="...">
                 </div>
             </div>
-            
+
             <div class="btn-group">
-                <button class="action-btn btn-primary" onclick="calculate('+')">+</button>
-                <button class="action-btn btn-primary" onclick="calculate('-')">-</button>
-                <button class="action-btn btn-primary" onclick="calculate('*')">×</button>
-                <button class="action-btn btn-primary" onclick="calculate('/')">÷</button>
+                <button class="op-btn" onclick="calc('+')">+</button>
+                <button class="op-btn" onclick="calc('-')">−</button>
+                <button class="op-btn" onclick="calc('*')">×</button>
+                <button class="op-btn" onclick="calc('/')">÷</button>
             </div>
         </div>
 
-        <div id="conversionControls" class="hidden">
-            <div class="control-grid">
+        <div id="ui-conversion" class="hidden">
+            <div class="grid-2">
                 <div>
                     <label>From Base</label>
-                    <select id="convBaseFrom">
-                        <option value="2">Binary (Base 2)</option>
-                        <option value="8">Octal (Base 8)</option>
-                        <option value="10" selected>Decimal (Base 10)</option>
-                        <option value="16">Hexadecimal (Base 16)</option>
+                    <select id="convFrom">
+                        <option value="2">Binary</option>
+                        <option value="8">Octal</option>
+                        <option value="10">Decimal</option>
+                        <option value="16">Hexadecimal</option>
                     </select>
                 </div>
                 <div>
                     <label>To Base</label>
-                    <select id="convBaseTo">
-                        <option value="2">Binary (Base 2)</option>
-                        <option value="8">Octal (Base 8)</option>
-                        <option value="10">Decimal (Base 10)</option>
-                        <option value="16" selected>Hexadecimal (Base 16)</option>
+                    <select id="convTo">
+                        <option value="2">Binary</option>
+                        <option value="8">Octal</option>
+                        <option value="10">Decimal</option>
+                        <option value="16">Hexadecimal</option>
                     </select>
-                </div>
-                
-                <div style="grid-column: span 2;">
-                    <label>Number to Convert</label>
-                    <input type="text" id="convNum" placeholder="Enter number...">
                 </div>
             </div>
             
-            <button class="action-btn btn-accent" onclick="runConversion()">Convert & Explain</button>
+            <div style="margin-bottom: 20px;">
+                <label>Number</label>
+                <input type="text" id="convNum" placeholder="Enter value...">
+            </div>
+
+            <button class="convert-btn" onclick="convert()">Convert</button>
         </div>
 
-        <div id="resultOutput" class="result-display hidden"></div>
-        <div id="stepOutput" class="steps-container hidden"></div>
+        <div id="output" class="result-area hidden">
+            <div id="resMain" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;"></div>
+            <div id="resSteps" class="steps"></div>
+        </div>
+
     </div>
+</div>
 
-    <div class="card">
-        <h2>Quick Reference</h2>
-        <ul>
-            <li><a href="#conversions">Universal Conversion Logic</a></li>
-            <li><a href="#binary">Binary Math Rules</a></li>
-        </ul>
-    </div>
+<script>
+    // --- UTILS ---
+    function switchMode(mode) {
+        const arith = document.getElementById('ui-arithmetic');
+        const conv = document.getElementById('ui-conversion');
+        const tabA = document.getElementById('tabArith');
+        const tabC = document.getElementById('tabConv');
+        const out = document.getElementById('output');
 
-    <h2 id="conversions">1. The "Bridge" Method</h2>
-    <div class="step-box">
-        If converting between two non-decimal bases (e.g., Base 5 to Base 7), always stop at Base 10.
-        $$ \text{Source Base} \xrightarrow{\text{Multiply}} \text{Decimal} \xrightarrow{\text{Divide}} \text{Target Base} $$
-    </div>
+        out.classList.add('hidden');
 
-    <div class="card">
-        <h3>Step 1: To Decimal (Multiply)</h3>
-        <p>Multiply each digit $d$ by the base $b$ power of its position $i$.</p>
-        $$ \text{Val} = \dots + (d_2 \times b^2) + (d_1 \times b^1) + (d_0 \times b^0) $$
-    </div>
+        if(mode === 'arithmetic') {
+            arith.classList.remove('hidden');
+            conv.classList.add('hidden');
+            tabA.classList.add('active');
+            tabC.classList.remove('active');
+        } else {
+            arith.classList.add('hidden');
+            conv.classList.remove('hidden');
+            tabA.classList.remove('active');
+            tabC.classList.add('active');
+        }
+    }
 
-    <div class="card">
-        <h3>Step 2: From Decimal (Divide)</h3>
-        <p>Divide the decimal number by the new base repeatedly and collect remainders.</p>
-    </div>
+    // Helper for char conversions
+    const getVal = c => parseInt(c, 16);
+    const getChar = v => v.toString(16).toUpperCase();
 
-    <script>
-        // --- STATE MANAGEMENT ---
-        let currentMode = 'arithmetic';
+    // --- ARITHMETIC LOGIC ---
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('btnModeArith').className = mode === 'arithmetic' ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btnModeConv').className = mode === 'conversion' ? 'mode-btn active' : 'mode-btn';
+    function calc(op) {
+        const base = parseInt(document.getElementById('arithBase').value);
+        const sA = document.getElementById('numA').value.trim().toUpperCase();
+        const sB = document.getElementById('numB').value.trim().toUpperCase();
+
+        if(!sA || !sB) return;
+
+        // Validation
+        if(isNaN(parseInt(sA, base)) || isNaN(parseInt(sB, base))) {
+            showError(`Invalid inputs for Base ${base}`);
+            return;
+        }
+
+        let result = {};
+
+        // Route to specific handlers
+        if (base === 2) {
+            // Binary Specific Native Logic
+            if(op === '*') result = binaryMult(sA, sB);
+            else if(op === '/') result = binaryDiv(sA, sB);
+            else if(op === '+') result = nativeAdd(sA, sB, 2);
+            else if(op === '-') result = nativeSub(sA, sB, 2);
+        } else {
+            // Octal/Hex Logic
+            if(op === '+') result = nativeAdd(sA, sB, base);
+            else if(op === '-') result = nativeSub(sA, sB, base);
+            else result = bridgeMath(sA, sB, base, op); // Fallback for hard mult/div
+        }
+
+        renderResult(result, base);
+    }
+
+    // NATIVE BINARY MULTIPLICATION (Shift & Add)
+    function binaryMult(A, B) {
+        let steps = [`<strong>Binary Multiplication (Shift & Add):</strong>`];
+        steps.push(`   ${A}`);
+        steps.push(`x  ${B}`);
+        steps.push(`-------`);
+
+        let partials = [];
+        let bRev = B.split('').reverse();
+        
+        // Generate partial products
+        for(let i=0; i < bRev.length; i++) {
+            let digit = bRev[i];
+            let shift = "0".repeat(i);
             
-            if(mode === 'arithmetic') {
-                document.getElementById('arithmeticControls').classList.remove('hidden');
-                document.getElementById('conversionControls').classList.add('hidden');
+            if(digit === '1') {
+                let part = A + shift;
+                partials.push(parseInt(part, 2)); // store val for summing
+                steps.push(`   ${A} (x1, shift ${i}) -> ${part.padStart(A.length + B.length, ' ')}`);
             } else {
-                document.getElementById('arithmeticControls').classList.add('hidden');
-                document.getElementById('conversionControls').classList.remove('hidden');
+                let part = "0" + shift; // simplistic representation
+                steps.push(`   000... (x0, shift ${i})`);
             }
-            
-            // Clear outputs
-            document.getElementById('resultOutput').classList.add('hidden');
-            document.getElementById('stepOutput').classList.add('hidden');
-        }
-
-        // --- NATIVE ARITHMETIC ENGINE ---
-        
-        // Helper to get integer value of a digit character (0-9, A-Z)
-        function getVal(char) {
-            return parseInt(char, 36);
         }
         
-        // Helper to get character for value (0-35)
-        function getChar(val) {
-            return val.toString(36).toUpperCase();
+        steps.push(`-------`);
+        // Calculate sum
+        let sum = parseInt(A, 2) * parseInt(B, 2);
+        let binSum = sum.toString(2);
+        steps.push(`Sum all partials: ${binSum}`);
+
+        return { val: binSum, steps: steps.join('\n') };
+    }
+
+    // NATIVE BINARY DIVISION (Long Division)
+    function binaryDiv(dividendStr, divisorStr) {
+        let divisor = parseInt(divisorStr, 2);
+        let dividendVal = parseInt(dividendStr, 2);
+
+        if(divisor === 0) return { val: "Undefined", steps: "Division by Zero" };
+
+        let steps = [`<strong>Binary Long Division:</strong>`];
+        steps.push(`   __________`);
+        steps.push(`${divisorStr} ) ${dividendStr}`);
+        
+        let result = "";
+        let currentPartStr = "";
+        let stepsLog = [];
+
+        // Iterate through dividend bits
+        for (let i = 0; i < dividendStr.length; i++) {
+            currentPartStr += dividendStr[i];
+            let currentPartVal = parseInt(currentPartStr, 2);
+
+            stepsLog.push(`\nBit ${i}: Bring down ${dividendStr[i]}. Working num: ${currentPartStr}`);
+
+            if (currentPartVal >= divisor) {
+                stepsLog.push(`   ${divisorStr} fits in ${parseInt(currentPartVal.toString(2), 2).toString(2)}? YES (1)`);
+                result += "1";
+                let rem = currentPartVal - divisor;
+                stepsLog.push(`   Subtract: ${currentPartVal.toString(2)} - ${divisorStr} = ${rem.toString(2)}`);
+                currentPartStr = rem.toString(2);
+            } else {
+                stepsLog.push(`   ${divisorStr} fits in ${parseInt(currentPartVal.toString(2), 2).toString(2)}? NO (0)`);
+                result += "0";
+            }
         }
+        
+        // Clean up result
+        result = result.replace(/^0+/, '') || '0';
+        steps.push(stepsLog.join(''));
+        steps.push(`\n<strong>Quotient:</strong> ${result}`);
+        steps.push(`<strong>Remainder:</strong> ${currentPartStr}`);
 
-        function nativeAdd(aStr, bStr, base) {
-            let steps = [];
-            let res = "";
-            let carry = 0;
-            
-            // Pad strings
-            let maxLen = Math.max(aStr.length, bStr.length);
-            let A = aStr.padStart(maxLen, '0').split('').reverse();
-            let B = bStr.padStart(maxLen, '0').split('').reverse();
-            
-            steps.push(`<strong>Column Addition (Base ${base}):</strong>`);
-            
-            for(let i=0; i<maxLen; i++) {
-                let va = getVal(A[i]);
-                let vb = getVal(B[i]);
-                let sum = va + vb + carry;
-                
-                let write = sum % base;
-                let newCarry = Math.floor(sum / base);
-                
-                steps.push(`Col ${i}: ${getChar(va)} + ${getChar(vb)} + ${carry}(carry) = ${sum} (dec)`);
-                
-                if(sum >= base) {
-                    steps.push(`   ${sum} is $\\ge$ ${base}. Write ${getChar(write)}, Carry ${newCarry} (${sum} - ${base} = ${write})`);
-                } else {
-                    steps.push(`   Write ${getChar(write)}, Carry 0`);
-                }
-                
-                res = getChar(write) + res;
-                carry = newCarry;
-            }
-            
-            if(carry > 0) {
-                steps.push(`Final Carry: Write ${getChar(carry)}`);
-                res = getChar(carry) + res;
-            }
-            
-            return { result: res, steps: steps.join('\n') };
+        return { val: `${result} (R: ${currentPartStr})`, steps: steps.join('\n') };
+    }
+
+    // NATIVE ADDITION (Generic)
+    function nativeAdd(aStr, bStr, base) {
+        let steps = [`<strong>Column Addition (Base ${base}):</strong>`];
+        let maxLen = Math.max(aStr.length, bStr.length);
+        let A = aStr.padStart(maxLen, '0').split('').reverse();
+        let B = bStr.padStart(maxLen, '0').split('').reverse();
+        let res = "", carry = 0;
+
+        for(let i=0; i<maxLen; i++) {
+            let va = getVal(A[i]), vb = getVal(B[i]);
+            let sum = va + vb + carry;
+            let write = sum % base;
+            let newCarry = Math.floor(sum / base);
+
+            steps.push(`Col ${i}: ${getChar(va)}+${getChar(vb)}+${carry} = ${sum}. Write ${getChar(write)}, Carry ${newCarry}`);
+            res = getChar(write) + res;
+            carry = newCarry;
         }
+        if(carry) {
+            steps.push(`Final Carry: ${getChar(carry)}`);
+            res = getChar(carry) + res;
+        }
+        return { val: res, steps: steps.join('\n') };
+    }
 
-        function nativeSub(aStr, bStr, base) {
-            // Ensure A >= B for this simple implementation
-            if (parseInt(aStr, base) < parseInt(bStr, base)) {
-                return { result: "Negative Result", steps: "This tool currently supports A - B where A >= B." };
-            }
+    // NATIVE SUBTRACTION (Generic)
+    function nativeSub(aStr, bStr, base) {
+        let vA = parseInt(aStr, base);
+        let vB = parseInt(bStr, base);
+        if(vA < vB) return { val: "Negatives not supported", steps: "A must be >= B" };
 
-            let steps = [];
-            let res = "";
-            
-            let A = aStr.split('').reverse().map(x => getVal(x));
-            let B = bStr.padStart(aStr.length, '0').split('').reverse().map(x => getVal(x));
-            
-            steps.push(`<strong>Column Subtraction (Base ${base}):</strong>`);
-            
-            for(let i=0; i<A.length; i++) {
-                let va = A[i];
-                let vb = B[i] || 0;
-                
-                steps.push(`Col ${i}: ${getChar(va)} - ${getChar(vb)}`);
-                
-                if (va < vb) {
-                    // Borrow
-                    steps.push(`   Cannot do ${va} - ${vb}. Borrow from left.`);
-                    
-                    // Find next non-zero digit to borrow from
-                    let j = i + 1;
-                    while (j < A.length && A[j] === 0) j++;
-                    
-                    if (j >= A.length) {
-                         steps.push("   Error: Impossible borrow (A < B?)");
-                         break;
-                    }
-                    
-                    // Execute borrow
+        let steps = [`<strong>Column Subtraction (Base ${base}):</strong>`];
+        let A = aStr.split('').reverse().map(getVal);
+        let B = bStr.padStart(aStr.length, '0').split('').reverse().map(getVal);
+        let res = "";
+
+        for(let i=0; i<A.length; i++) {
+            let va = A[i], vb = B[i] || 0;
+            if(va < vb) {
+                // Borrow Logic
+                let j = i + 1;
+                while(j < A.length && A[j] === 0) j++;
+                if(j < A.length) {
                     A[j]--;
-                    for (let k = j - 1; k > i; k--) A[k] = base - 1;
+                    for(let k=j-1; k>i; k--) A[k] = base-1;
                     va += base;
-                    
-                    steps.push(`   Borrowed. Current digit becomes ${va} (dec).`);
+                    steps.push(`Col ${i}: Borrowed. ${va} - ${vb} = ${va-vb}`);
                 }
-                
-                let diff = va - vb;
-                steps.push(`   ${va} - ${vb} = ${diff}. Write ${getChar(diff)}.`);
-                res = getChar(diff) + res;
-            }
-            
-            // Trim leading zeros
-            res = res.replace(/^0+/, '') || '0';
-            return { result: res, steps: steps.join('\n') };
-        }
-
-        function calculate(op) {
-            const base = parseInt(document.getElementById('arithBase').value);
-            const numA = document.getElementById('numA').value.trim().toUpperCase();
-            const numB = document.getElementById('numB').value.trim().toUpperCase();
-            
-            const outRes = document.getElementById('resultOutput');
-            const outStep = document.getElementById('stepOutput');
-            
-            if(!numA || !numB) {
-                alert("Please enter numbers.");
-                return;
-            }
-
-            // Validation
-            if(Number.isNaN(parseInt(numA, base)) || Number.isNaN(parseInt(numB, base))) {
-                alert(`Invalid digits for Base ${base}`);
-                return;
-            }
-
-            let resultData;
-
-            // Native Logic Selection
-            if (op === '+') {
-                resultData = nativeAdd(numA, numB, base);
-            } else if (op === '-') {
-                resultData = nativeSub(numA, numB, base);
             } else {
-                // For * and / we use decimal bridge for simplicity in this version, 
-                // but output looks cleaner.
-                const decA = parseInt(numA, base);
-                const decB = parseInt(numB, base);
-                let resDec = (op === '*') ? decA * decB : Math.floor(decA / decB);
-                
-                if(op === '/' && decB === 0) {
-                    resultData = { result: "Undefined", steps: "Division by Zero" };
-                } else {
-                    let resStr = resDec.toString(base).toUpperCase();
-                    let opName = op === '*' ? 'Multiplication' : 'Division';
-                    let steps = `<strong>${opName} (Via Decimal Bridge):</strong>\n`;
-                    steps += `1. Convert A to Dec: ${numA} (base ${base}) = ${decA}\n`;
-                    steps += `2. Convert B to Dec: ${numB} (base ${base}) = ${decB}\n`;
-                    steps += `3. Calculate: ${decA} ${op} ${decB} = ${resDec}\n`;
-                    steps += `4. Convert ${resDec} back to Base ${base}: ${resStr}`;
-                    resultData = { result: resStr, steps: steps };
-                }
+                steps.push(`Col ${i}: ${va} - ${vb} = ${va-vb}`);
             }
-
-            outRes.innerHTML = `Result: <strong style="color:#4ade80; font-size:1.4em;">${resultData.result}</strong> (Base ${base})`;
-            outStep.innerHTML = resultData.steps;
-            
-            outRes.classList.remove('hidden');
-            outStep.classList.remove('hidden');
-            
-            // Re-render LaTeX
-            if(window.MathJax) MathJax.typeset();
+            res = getChar(va - vb) + res;
         }
+        return { val: res.replace(/^0+/, '') || '0', steps: steps.join('\n') };
+    }
 
-        // --- CONVERSION ENGINE ---
+    // BRIDGE MATH (For Oct/Hex Mul/Div)
+    function bridgeMath(a, b, base, op) {
+        let da = parseInt(a, base), db = parseInt(b, base);
+        let resDec = op=='*' ? da*db : Math.floor(da/db);
+        if(op=='/' && db==0) return {val:"Undefined", steps:"Div by 0"};
+        
+        let s = `<strong>Operation via Decimal:</strong>\n`;
+        s += `1. ${a} -> ${da} (dec)\n2. ${b} -> ${db} (dec)\n`;
+        s += `3. ${da} ${op} ${db} = ${resDec}\n`;
+        s += `4. Convert ${resDec} to Base ${base}`;
+        return { val: resDec.toString(base).toUpperCase(), steps: s };
+    }
 
-        function runConversion() {
-            const fromBase = parseInt(document.getElementById('convBaseFrom').value);
-            const toBase = parseInt(document.getElementById('convBaseTo').value);
-            const num = document.getElementById('convNum').value.trim().toUpperCase();
+    // --- CONVERSION LOGIC ---
+
+    function convert() {
+        const from = parseInt(document.getElementById('convFrom').value);
+        const to = parseInt(document.getElementById('convTo').value);
+        const num = document.getElementById('convNum').value.trim().toUpperCase();
+
+        if(!num) return;
+        
+        try {
+            // Validation
+            const digits = num.split('');
+            for(let d of digits) if(getVal(d) >= from) throw "Invalid Digit";
             
-            const outRes = document.getElementById('resultOutput');
-            const outStep = document.getElementById('stepOutput');
-
-            if(!num) return;
-
-            // Validate
-            let decVal;
-            try {
-                // Check if digits match base
-                for(let char of num) {
-                    if(getVal(char) >= fromBase) throw new Error();
-                }
-                decVal = parseInt(num, fromBase);
-                if(isNaN(decVal)) throw new Error();
-            } catch(e) {
-                alert(`Invalid number "${num}" for Base ${fromBase}`);
-                return;
-            }
-
-            const resStr = decVal.toString(toBase).toUpperCase();
-            let steps = "";
-
-            // SCENARIO 1: Same Base
-            if (fromBase === toBase) {
-                steps = "Number is already in the target base.";
-            }
-            // SCENARIO 2: From Decimal -> To X
-            else if (fromBase === 10) {
-                steps = getDecToBaseSteps(decVal, toBase);
-            }
-            // SCENARIO 3: From X -> To Decimal
-            else if (toBase === 10) {
-                steps = getBaseToDecSteps(num, fromBase);
-            }
-            // SCENARIO 4: Base X -> Base Y (Bridge)
-            else {
-                steps += `<strong>Phase 1: Convert Base ${fromBase} to Decimal</strong>\n`;
-                steps += getBaseToDecSteps(num, fromBase);
-                steps += `\n\n<hr style="border-color:#475569">\n\n`;
-                steps += `<strong>Phase 2: Convert Decimal to Base ${toBase}</strong>\n`;
-                steps += `Decimal Value: ${decVal}\n`;
-                steps += getDecToBaseSteps(decVal, toBase);
-            }
-
-            outRes.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>${num}<sub>${fromBase}</sub> = </span>
-                    <strong style="color:#4ade80; font-size:1.5em;">${resStr}<sub>${toBase}</sub></strong>
-                </div>`;
-            outStep.innerHTML = steps;
-
-            outRes.classList.remove('hidden');
-            outStep.classList.remove('hidden');
-            if(window.MathJax) MathJax.typeset();
-        }
-
-        function getBaseToDecSteps(numStr, base) {
-            let s = `Polynomial Method (Expansion):\n`;
-            let digits = numStr.split('').reverse();
-            let sum = 0;
-            digits.forEach((d, i) => {
-                let v = getVal(d);
-                let power = Math.pow(base, i);
-                let sub = v * power;
-                sum += sub;
-                s += `Digit ${d} (pos ${i}): ${v} × ${base}^${i} = ${sub}\n`;
+            const dec = parseInt(num, from);
+            const res = dec.toString(to).toUpperCase();
+            
+            let s = `<strong>Conversion Path: Base ${from} -> Decimal -> Base ${to}</strong>\n\n`;
+            
+            // To Decimal
+            s += `<strong>1. To Decimal:</strong>\n`;
+            let sumStr = [];
+            num.split('').reverse().forEach((d,i) => {
+                s += `   ${d} × ${from}^${i} = ${getVal(d) * Math.pow(from,i)}\n`;
             });
-            s += `Total Sum: ${sum}`;
-            return s;
-        }
+            s += `   Sum = ${dec}\n\n`;
 
-        function getDecToBaseSteps(decNum, base) {
-            let s = `Repeated Division Method (Divide by ${base}):\n`;
-            let curr = decNum;
-            let remainders = [];
-            
-            if(curr === 0) return "Value is 0.";
-
+            // From Decimal
+            s += `<strong>2. To Base ${to}:</strong>\n`;
+            let curr = dec;
+            if(curr===0) s += "   0 -> 0";
             while(curr > 0) {
-                let rem = curr % base;
-                let quot = Math.floor(curr / base);
-                s += `${curr} ÷ ${base} = ${quot} with Remainder ${getChar(rem)}\n`;
-                remainders.push(getChar(rem));
+                let rem = curr % to;
+                let quot = Math.floor(curr/to);
+                s += `   ${curr} ÷ ${to} = ${quot} R ${getChar(rem)}\n`;
                 curr = quot;
             }
-            s += `\nRead Remainders Bottom-to-Top: <strong>${remainders.reverse().join('')}</strong>`;
-            return s;
-        }
+            s += `   Result (Bottom-up): ${res}`;
 
-    </script>
+            renderResult({val: res, steps: s}, to);
+
+        } catch(e) {
+            showError("Invalid Number");
+        }
+    }
+
+    function renderResult(data, base) {
+        const out = document.getElementById('output');
+        const main = document.getElementById('resMain');
+        const steps = document.getElementById('resSteps');
+
+        main.innerHTML = `${data.val} <span style="font-size:0.6em; color:#94a3b8;">(Base ${base})</span>`;
+        steps.innerHTML = data.steps;
+        out.classList.remove('hidden');
+    }
+
+    function showError(msg) {
+        const out = document.getElementById('output');
+        out.innerHTML = `<span style="color: #ef4444;">${msg}</span>`;
+        out.classList.remove('hidden');
+    }
+
+</script>
 </body>
 </html>
