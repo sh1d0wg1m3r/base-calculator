@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Arithmetic & Conversion Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --code-bg: #f1f5f9;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 { color: #0f172a; }
+        h1 { border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
+        h2 { margin-top: 40px; border-left: 5px solid var(--primary); padding-left: 10px; }
+        
+        .card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #d946ef;
+        }
+
+        .step-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        /* Interactive Tools Styles */
+        .tool-panel {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .tool-panel h3 { color: white; margin-top: 0; }
+        input, select, button {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { opacity: 0.9; }
+        .result-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+        th { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <h1>Base Arithmetic & Conversion Masterclass</h1>
+    <p>A simple guide for students to master Binary (Base 2), Octal (Base 8), and Hexadecimal (Base 16).</p>
+
+    <div class="card">
+        <h3>Jump to:</h3>
+        <ul>
+            <li><a href="#conversions">How to Convert (The Generic Method)</a></li>
+            <li><a href="#binary">Binary Operations</a></li>
+            <li><a href="#octal">Octal Operations</a></li>
+            <li><a href="#hex">Hexadecimal Operations</a></li>
+            <li><a href="#tool">Interactive Calculator</a></li>
+        </ul>
+    </div>
+
+    <h2 id="conversions">1. The "Any-to-Any" Conversion Strategy</h2>
+    <p>The safest way to convert between two weird bases (e.g., Base 5 to Base 7) is to use <strong>Base 10</strong> as a bridge.</p>
+    <div class="step-box">
+        <strong>The Algorithm:</strong><br>
+        Source Base → Convert to Base 10 → Convert to Target Base
+    </div>
+
+    <div class="card">
+        <h3>Part A: Any Base to Base 10</h3>
+        <p>Use <strong>Positional Notation</strong>. Multiply each digit by the base raised to the power of its position (starting from 0 on the right).</p>
+        <p><strong>Example: Convert Hex <code>2C</code> to Decimal</strong></p>
+        <ul>
+            <li>Digits: 2, C (where C = 12)</li>
+            <li>Positions: 1, 0</li>
+            <li>Calculation: $(2 \times 16^1) + (12 \times 16^0)$</li>
+            <li>$32 + 12 = 44$</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Part B: Base 10 to Any Base</h3>
+        <p>Use the <strong>Division-Remainder Method</strong>.</p>
+        <ol>
+            <li>Divide the number by the target base.</li>
+            <li>Write down the remainder.</li>
+            <li>Take the quotient (result) and divide it by the base again.</li>
+            <li>Repeat until the quotient is 0.</li>
+            <li>Read remainders from <strong>bottom to top</strong> (last remainder is the first digit).</li>
+        </ol>
+        <p><strong>Example: Convert Decimal <code>13</code> to Binary</strong></p>
+        <ul>
+            <li>$13 \div 2 = 6$ (Remainder <strong>1</strong>)</li>
+            <li>$6 \div 2 = 3$ (Remainder <strong>0</strong>)</li>
+            <li>$3 \div 2 = 1$ (Remainder <strong>1</strong>)</li>
+            <li>$1 \div 2 = 0$ (Remainder <strong>1</strong>)</li>
+            <li>Result (Bottom-up): <code>1101</code></li>
+        </ul>
+    </div>
+
+    <h2 id="binary">2. Binary Arithmetic (Base 2)</h2>
+    <p>Only digits <code>0</code> and <code>1</code> allowed. Remember: $1 + 1 = 10$ (2 in decimal).</p>
+
+    <div class="card">
+        <h3>Binary Addition (+)</h3>
+        <p><strong>Rules:</strong> $0+0=0$, $0+1=1$, $1+1=10$ (write 0, carry 1), $1+1+1=11$ (write 1, carry 1).</p>
+        <pre>
+  1011  (11)
++ 0110  (6)
+------
+ 10001  (17)
+        </pre>
+    </div>
+
+    <div class="card">
+        <h3>Binary Subtraction (-)</h3>
+        <p><strong>Rules:</strong> $0-0=0$, $1-1=0$, $1-0=1$. For $0-1$, borrow from the left (the 0 becomes 10 (which is 2)).</p>
+        <pre>
+  1101  (13)
+- 1010  (10)
+------
+  0011  (3)
+        </pre>
+    </div>
+
+    <div class="card">
+        <h3>Binary Multiplication (*)</h3>
+        <p>Same as decimal, but easier! You either multiply by 1 (copy the number) or 0 (write zeros).</p>
+        <pre>
+    101 (5)
+  x  11 (3)
+  -----
+    101 (1 * 101)
++ 1010  (1 * 101 shifted left)
+------
+  1111  (15)
+        </pre>
+    </div>
+
+    <div class="card">
+        <h3>Binary Division (/)</h3>
+        <p>Long division. "Does the divisor fit?" Yes = 1, No = 0.</p>
+        <pre>
+      11  (3)
+    ____
+10 ) 110  (6)
+     10
+     --
+      10
+      10
+      --
+       0
+        </pre>
+    </div>
+
+    <h2 id="octal">3. Octal Arithmetic (Base 8)</h2>
+    <p>Digits <code>0-7</code>. If you hit 8, you carry over.</p>
+    
+    <div class="card">
+        <h3>Octal Addition</h3>
+        <p>Example: $7 + 1 = 10_8$. $6 + 4 = 12_8$ (because $6+4=10$ dec, and $10 = 1 \times 8 + 2$).</p>
+        <pre>
+   145 (Octal)
++   63
+------
+   230
+   
+1. 5+3=8. 8 is not in Octal. 8 = 10 (base 8). Write 0, carry 1.
+2. 4+6+1(carry) = 11 dec. 11 = 8+3 = 13 (base 8). Write 3, carry 1.
+3. 1+1(carry) = 2.
+        </pre>
+    </div>
+
+    <h2 id="hex">4. Hexadecimal Arithmetic (Base 16)</h2>
+    <p>Digits <code>0-9</code> and <code>A-F</code> (A=10, B=11, C=12, D=13, E=14, F=15).</p>
+
+    <div class="card">
+        <h3>Hex Addition</h3>
+        <p>Example: $A + 1 = B$. $F + 1 = 10_{16}$.</p>
+        <pre>
+   1A (26 dec)
++  2C (44 dec)
+-----
+   46 (70 dec)
+
+1. A(10) + C(12) = 22 dec. 
+   22 = 16 + 6 = 16(16). Write 6, carry 1.
+2. 1 + 2 + 1(carry) = 4.
+        </pre>
+    </div>
+
+    <div class="tool-panel" id="tool">
+        <h3>🎓 Student Lab: Calculator & Converter</h3>
+        <p>Test your homework here.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Number A</label><br>
+                <input type="text" id="numA" placeholder="e.g. 1010" style="width: 90%;">
+            </div>
+            <div>
+                <label>Number B (for math)</label><br>
+                <input type="text" id="numB" placeholder="e.g. 0101" style="width: 90%;">
+            </div>
+        </div>
+
+        <label>Base</label><br>
+        <select id="baseSelect" style="width: 100%;">
+            <option value="2">Binary (Base 2)</option>
+            <option value="8">Octal (Base 8)</option>
+            <option value="10">Decimal (Base 10)</option>
+            <option value="16">Hexadecimal (Base 16)</option>
+        </select>
+
+        <br><br>
+        <strong>Operations:</strong><br>
+        <button onclick="calculate('+')">Add (+)</button>
+        <button onclick="calculate('-')">Subtract (-)</button>
+        <button onclick="calculate('*')">Multiply (*)</button>
+        <button onclick="calculate('/')">Divide (/)</button>
+        <button onclick="convert()" style="background-color: #d946ef;">Just Convert A</button>
+
+        <div id="resultOutput" class="result-box">
+            Results will appear here...
+        </div>
+    </div>
+
+    <script>
+        function getBase() {
+            return parseInt(document.getElementById('baseSelect').value);
+        }
+
+        function convert() {
+            const valA = document.getElementById('numA').value;
+            const base = getBase();
+            const output = document.getElementById('resultOutput');
+            
+            try {
+                // Parse integer from current base
+                const dec = parseInt(valA, base);
+                if (isNaN(dec)) throw new Error("Invalid number for selected base");
+
+                output.innerHTML = `
+                    <strong>Conversions for ${valA} (Base ${base}):</strong><br>
+                    Binary: ${dec.toString(2)}<br>
+                    Octal: ${dec.toString(8)}<br>
+                    Decimal: ${dec.toString(10)}<br>
+                    Hex: ${dec.toString(16).toUpperCase()}
+                `;
+            } catch (e) {
+                output.innerText = "Error: Please check your input and base selection.";
+            }
+        }
+
+        function calculate(op) {
+            const strA = document.getElementById('numA').value;
+            const strB = document.getElementById('numB').value;
+            const base = getBase();
+            const output = document.getElementById('resultOutput');
+
+            try {
+                const a = parseInt(strA, base);
+                const b = parseInt(strB, base);
+
+                if (isNaN(a) || isNaN(b)) throw new Error("Invalid inputs");
+
+                let resDec = 0;
+                let symbol = '';
+
+                switch(op) {
+                    case '+': resDec = a + b; symbol = '+'; break;
+                    case '-': resDec = a - b; symbol = '-'; break;
+                    case '*': resDec = a * b; symbol = '*'; break;
+                    case '/': resDec = Math.floor(a / b); symbol = '/'; break;
+                }
+
+                output.innerHTML = `
+                    <strong>Operation Result (Base ${base}):</strong><br>
+                    ${strA} ${symbol} ${strB} = <span style="color: #4ade80; font-size: 1.2em;">${resDec.toString(base).toUpperCase()}</span><br>
+                    <small>(In Decimal: ${a} ${symbol} ${b} = ${resDec})</small>
+                `;
+            } catch (e) {
+                output.innerText = "Error: Check inputs. (Note: Division by zero?)";
+            }
+        }
+    </script>
+    
+    <footer style="margin-top: 50px; text-align: center; color: #64748b; font-size: 0.9em;">
+        <p>Generated for Base Learning • Runs locally & on GitHub Pages</p>
+    </footer>
+
+</body>
+</html>
